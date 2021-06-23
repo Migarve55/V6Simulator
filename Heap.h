@@ -4,7 +4,6 @@
 #define QUEUE_WAKEUP 0
 #define QUEUE_PRIORITY 1
 #define QUEUE_ARRIVAL 2
-#define QUEUE_ASSERTS 3
 
 // Implements the insertion operation in a binary heap. 
 // Parameters are:

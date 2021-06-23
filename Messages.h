@@ -3,8 +3,7 @@
 
 #define NUMBEROFMSGS 64
 
-#define STUDENT_MESSAGES_FILE "messagesSTD.txt"
-#define TEACHER_MESSAGES_FILE "messagesTCH.txt"
+#define MESSAGES_FILE "messages.txt"
 
 typedef struct {
   int number;

@@ -6,7 +6,7 @@
 #include "Device.h"
 #include "ComputerSystem.h"
 #include "Processor.h"
-
+#include "Clock.h"
 
 int registerStatus=FREE;
 int ioLapTime=11;  // Default Delay time

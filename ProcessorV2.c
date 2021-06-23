@@ -57,6 +57,7 @@ void Processor_InitializeInterruptVectorTable(int interruptVectorInitialAddress)
 void Processor_InstructionCycleLoop() {
 
 	while (!Processor_PSW_BitState(POWEROFF_BIT)) {
+		Clock_Update();
 		Processor_FetchInstruction();
 		Processor_DecodeAndExecuteInstruction();
 		if (interruptLines_CPU && !Processor_PSW_BitState(INTERRUPT_MASKED_BIT))
@@ -203,6 +204,7 @@ void Processor_DecodeAndExecuteInstruction() {
 				// Show message: " (PC: registerPC_CPU, Accumulator: registerAccumulator_CPU, PSW: registerPSW_CPU [Processor_ShowPSW()]\n
 				ComputerSystem_DebugMessage(3, HARDWARE,registerPC_CPU,registers[ACCUMULATOR],registerPSW_CPU,Processor_ShowPSW());
 				// Not all operating system code is executed in simulated processor, but really must do it... 
+				Clock_Update();
 				OperatingSystem_InterruptLogic(registerIR_CPU.operand1);
 				registerPC_CPU++;
 				// Update PSW bits (ZERO_BIT, NEGATIVE_BIT, ...)

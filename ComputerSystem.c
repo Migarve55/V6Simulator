@@ -5,7 +5,6 @@
 #include "ComputerSystemBase.h"
 #include "Processor.h"
 #include "Messages.h"
-#include "Asserts.h"
 #include "Clock.h"
 
 // Functions prototypes
@@ -27,15 +26,8 @@ void ComputerSystem_PowerOn(int argc, char *argv[]) {
 
 	// Load debug messages
 	int nm=0;
-	nm=Messages_Load_Messages(nm,TEACHER_MESSAGES_FILE);
-	nm=Messages_Load_Messages(nm,STUDENT_MESSAGES_FILE);
+	nm=Messages_Load_Messages(nm, MESSAGES_FILE);
 	printf("%d Messages Loaded\n",nm);
-
-	int na=Asserts_LoadAsserts();
-	if (na==-1)
-		printf("Asserts file unavailable\n");
-	else
-		printf("%d Asserts Loaded\n",na);
 
 	// Obtain a list of programs in the command line
 	int daemonsBaseIndex = ComputerSystem_ObtainProgramList(argc, argv);

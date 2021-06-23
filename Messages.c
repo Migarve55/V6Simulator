@@ -12,7 +12,7 @@ int Messages_Load_Messages(int position, char * nameFileMessage) {
 	FILE *mf;
 	char *number, *text;
 	int msgNumber;
-	int lineNumber=0;;
+	int lineNumber=0;
 	int rc;
 
 	mf=fopen(nameFileMessage, "r");

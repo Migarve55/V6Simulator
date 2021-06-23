@@ -3,7 +3,7 @@
 #
 ########################################################
 
-PROGRAM = 	Simulator
+PROGRAM = sim
 
 # Compilation Details
 SHELL = /bin/sh
@@ -11,23 +11,12 @@ CC = cc
 STDCFLAGS = -g -c -Wall -std=gnu90 
 INCLUDES =
 LIBRERIAS =
-ACC = /usr/share/ACC/bin/acc
 
-${PROGRAM}: Simulator.o Aspect.o Asserts.o Buses.o Clock.o ComputerSystem.o ComputerSystemBase.o Device.o Heap.o MainMemory.o Messages.o MMU.o OperatingSystemAspect.o OperatingSystemBase.o ProcessorAspect.o QueueFIFO.o
-	$(CC) -o ${PROGRAM} Simulator.o Aspect.o Asserts.o Buses.o Clock.o ComputerSystem.o ComputerSystemBase.o Device.o Heap.o MainMemory.o Messages.o MMU.o OperatingSystemAspect.o OperatingSystemBase.o ProcessorAspect.o QueueFIFO.o $(LIBRERIAS)
+${PROGRAM}: Simulator.o Buses.o Clock.o ComputerSystem.o ComputerSystemBase.o Device.o Heap.o MainMemory.o Messages.o MMU.o OperatingSystem.o OperatingSystemBase.o Processor.o QueueFIFO.o
+	$(CC) -o ${PROGRAM} Simulator.o Buses.o Clock.o ComputerSystem.o ComputerSystemBase.o Device.o Heap.o MainMemory.o Messages.o MMU.o OperatingSystem.o OperatingSystemBase.o Processor.o QueueFIFO.o $(LIBRERIAS)
 
 Simulator.o: Simulator.c Simulator.h
 	$(CC) $(STDCFLAGS) $(INCLUDES) Simulator.c
-
-Aspect.o: Aspect.acc
-	$(ACC) Aspect.acc
-	$(CC) $(STDCFLAGS) $(INCLUDES) -L /tmp/ACC/lib -lacc Aspect.c
-
-Aspect.acc: OperatingSystem.h Processor.h MyAspect.c
-	$(CC) -E $(INCLUDES) MyAspect.c > Aspect.acc
-
-Asserts.o: Asserts.c Asserts.h
-	$(CC) $(STDCFLAGS) $(INCLUDES) Asserts.c
 
 Buses.o: Buses.c Buses.h
 	$(CC) $(STDCFLAGS) $(INCLUDES) Buses.c
@@ -56,25 +45,17 @@ Messages.o: Messages.c Messages.h
 MMU.o: MMU.c MMU.h
 	$(CC) $(STDCFLAGS) $(INCLUDES) MMU.c
 
-OperatingSystemAspect.o: OperatingSystemAspect.mc Aspect.acc
-	$(ACC) OperatingSystemAspect.mc Aspect.acc
-	$(CC) $(STDCFLAGS) $(INCLUDES) -L /tmp/ACC/lib -lacc OperatingSystemAspect.c
-
-OperatingSystemAspect.mc: OperatingSystem.c OperatingSystem.h
-	$(CC) -E $(INCLUDES) OperatingSystem.c > OperatingSystemAspect.mc
+OperatingSystem.o: OperatingSystem.c OperatingSystem.h
+	$(CC) $(STDCFLAGS) $(INCLUDES) OperatingSystem.c
 
 OperatingSystemBase.o: OperatingSystemBase.c OperatingSystemBase.h OperatingSystem.h
 	$(CC) $(STDCFLAGS) $(INCLUDES) OperatingSystemBase.c
 
-ProcessorAspect.o: ProcessorAspect.mc Aspect.acc
-	$(ACC) ProcessorAspect.mc Aspect.acc
-	$(CC) $(STDCFLAGS) $(INCLUDES) -L /tmp/ACC/lib -lacc ProcessorAspect.c
-
-ProcessorAspect.mc: Processor.c Processor.h
-	$(CC) -E $(INCLUDES) Processor.c > ProcessorAspect.mc
+Processor.o: ProcessorV2.c ProcessorV2.h
+	$(CC) $(STDCFLAGS) $(INCLUDES) Processor.c
 
 QueueFIFO.o: QueueFIFO.c QueueFIFO.h
 	$(CC) $(STDCFLAGS) $(INCLUDES) QueueFIFO.c
 	
 clean:
-	rm -f $(PROGRAM) *.o *~ *.mc *.acc Aspect.c ProcessorAspect.c OperatingSystemAspect.c core
+	rm -f $(PROGRAM) *.o *~ core
