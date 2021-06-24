@@ -2,7 +2,6 @@
 #define COMPUTERSYSTEM_H
 
 #include "Simulator.h"
-#include "ComputerSystemBase.h"
 
 #define ARRIVALQUEUE
 
