@@ -23,13 +23,14 @@ void Processor_ShowTime(char);
 
 // Processor registers
 int registerPC_CPU; // Program counter
+int registerAccumulator_CPU; // Accumulator
 MEMORYCELL registerIR_CPU; // Instruction register
 unsigned int registerPSW_CPU = 128; // Processor state word, initially protected mode
 int registerMAR_CPU; // Memory Address Register
 MEMORYCELL registerMBR_CPU; // Memory Buffer Register
 
-//General purpose register
-int registers[REGISTERS]; //All other registers
+int registerA_CPU; // Syscall register
+int registerB_CPU; // Exception type register
 
 int interruptLines_CPU; // Processor interrupt lines
 
@@ -37,17 +38,18 @@ int interruptLines_CPU; // Processor interrupt lines
 int interruptVectorTable[INTERRUPTTYPES];
 
 // For PSW show "--------X---FNZS"
-char pswmask []="----------------";
+char pswmask []="----------------"; 
 
 // Initialization of the interrupt vector table
 void Processor_InitializeInterruptVectorTable(int interruptVectorInitialAddress) {
 	int i;
 	for (i=0; i< INTERRUPTTYPES;i++)  // Inicialice all to inicial YRET
 		interruptVectorTable[i]=interruptVectorInitialAddress-1;  
-
+	
 	interruptVectorTable[SYSCALL_BIT]=interruptVectorInitialAddress;  // SYSCALL_BIT=2
 	interruptVectorTable[EXCEPTION_BIT]=interruptVectorInitialAddress+2; // EXCEPTION_BIT=6
-	interruptVectorTable[CLOCK_BIT]=interruptVectorInitialAddress+4; // CLOCK_BIT=9
+	interruptVectorTable[IOEND_BIT]=interruptVectorInitialAddress+4;  // IOEND_BIT=8
+	interruptVectorTable[CLOCK_BIT]=interruptVectorInitialAddress+6; // CLOCK_BIT=9
 }
 
 
@@ -55,13 +57,12 @@ void Processor_InitializeInterruptVectorTable(int interruptVectorInitialAddress)
 // The processor stops working when an POWEROFF signal is stored in its
 // PSW register
 void Processor_InstructionCycleLoop() {
-
 	while (!Processor_PSW_BitState(POWEROFF_BIT)) {
-		Clock_Update();
 		Processor_FetchInstruction();
 		Processor_DecodeAndExecuteInstruction();
 		if (interruptLines_CPU && !Processor_PSW_BitState(INTERRUPT_MASKED_BIT))
 			Processor_ManageInterrupts();
+		//getchar();
 	}
 }
 
@@ -89,10 +90,6 @@ void Processor_FetchInstruction() {
 	}
 }
 
-//Returns true if it is  a valid instruction register
-//bool Processor_CheckRegister(int reg) {
-//	return reg >= 0 && reg < REGISTERS;
-//}
 
 // Decode and execute the instruction in the IR register
 void Processor_DecodeAndExecuteInstruction() {
@@ -104,23 +101,24 @@ void Processor_DecodeAndExecuteInstruction() {
 	  
 		// Instruction ADD
 		case 'a':
-			registers[ACCUMULATOR] = registers[registerIR_CPU.operand1] + registers[registerIR_CPU.operand2];	
-			Processor_CheckOverflow(registers[registerIR_CPU.operand1],registers[registerIR_CPU.operand2]);
+			registerAccumulator_CPU= registerIR_CPU.operand1 + registerIR_CPU.operand2;	
+			Processor_CheckOverflow(registerIR_CPU.operand1,registerIR_CPU.operand2);
 			registerPC_CPU++;
 			break;
 		
-		// Instruction SET
+		// Instruction SUB
 		case 's':
-			registers[registerIR_CPU.operand1] = registerIR_CPU.operand2;
+			registerAccumulator_CPU= registerIR_CPU.operand1 - registerIR_CPU.operand2;
+			Processor_CheckOverflow(registerIR_CPU.operand1,-registerIR_CPU.operand2);
 			registerPC_CPU++;
 			break;
 		
 		// Instruction DIV
 		case 'd':
-			if (registers[registerIR_CPU.operand2] == 0)
-				Processor_RaiseInterrupt(EXCEPTION_BIT); 
+			if (registerIR_CPU.operand2 == 0)
+				Processor_RaiseException(DIVISIONBYZERO);
 			else {
-				registers[ACCUMULATOR] = registers[registerIR_CPU.operand1] / registers[registerIR_CPU.operand2];
+				registerAccumulator_CPU=registerIR_CPU.operand1 / registerIR_CPU.operand2;
 				registerPC_CPU++;
 			}
 			break;
@@ -128,7 +126,7 @@ void Processor_DecodeAndExecuteInstruction() {
 		// Instruction TRAP
 		case 't':
 			Processor_RaiseInterrupt(SYSCALL_BIT);
-			registers[REG_A] = registerIR_CPU.operand1;
+			registerA_CPU=registerIR_CPU.operand1;
 			registerPC_CPU++;
 			break;
 		
@@ -139,20 +137,20 @@ void Processor_DecodeAndExecuteInstruction() {
 			  
 		// Instruction JUMP
 		case 'j':
-			registerPC_CPU += registerIR_CPU.operand1;
+			registerPC_CPU+= registerIR_CPU.operand1;
 			break;
 			  
 		// Instruction ZJUMP
 		case 'z':  // Jump if ZERO_BIT on
 			if (Processor_PSW_BitState(ZERO_BIT))
-				registerPC_CPU += registerIR_CPU.operand1;
+				registerPC_CPU+= registerIR_CPU.operand1;
 			else
 				registerPC_CPU++;
 			break;
 
 		// Instruction WRITE
 		case 'w':
-			registerMBR_CPU.operationCode= registerMBR_CPU.operand1= registerMBR_CPU.operand2= registers[registerIR_CPU.operand2];
+			registerMBR_CPU.operationCode= registerMBR_CPU.operand1= registerMBR_CPU.operand2= registerAccumulator_CPU;
 			registerMAR_CPU=registerIR_CPU.operand1;
 			// Send to the main memory controller the data to be written: use the data bus for this
 			Buses_write_DataBus_From_To(CPU, MAINMEMORY);
@@ -165,21 +163,21 @@ void Processor_DecodeAndExecuteInstruction() {
 
 		// Instruction READ
 		case 'r':
-			registerMAR_CPU = registerIR_CPU.operand1;
+			registerMAR_CPU=registerIR_CPU.operand1;
 			// Send to the main memory controller the address in which the reading has to take place: use the address bus for this
 			Buses_write_AddressBus_From_To(CPU, MMU);
 			// Tell the main memory controller to read
 			MMU_readMemory();
 			// Copy the read data to the accumulator register
-			registers[registerMBR_CPU.operand2] = registerMBR_CPU.operand1;
+			registerAccumulator_CPU= registerMBR_CPU.operand1;
 			registerPC_CPU++;
 			break;
 
 		// Instruction INC
 		case 'i':
-			tempAcc=registers[registerIR_CPU.operand1];
-			registers[registerIR_CPU.operand1] += registerIR_CPU.operand2;
-			Processor_CheckOverflow(tempAcc,registerIR_CPU.operand2);
+			tempAcc=registerAccumulator_CPU;
+			registerAccumulator_CPU+= registerIR_CPU.operand1;
+			Processor_CheckOverflow(tempAcc,registerIR_CPU.operand1);
 			registerPC_CPU++;
 			break;
 
@@ -188,12 +186,16 @@ void Processor_DecodeAndExecuteInstruction() {
 			if (Processor_PSW_BitState(EXECUTION_MODE_BIT))
 				Processor_ActivatePSW_Bit(POWEROFF_BIT);
 			else
-				Processor_RaiseInterrupt(EXCEPTION_BIT); 
+				Processor_RaiseException(INVALIDPROCESSORMODE);
 			break;
 			
-		// Instruction MOVE
+		// Instruction MEMADD
 		case 'm': 
-			registers[registerIR_CPU.operand2] = registers[registerIR_CPU.operand1];
+		    registerMAR_CPU=registerIR_CPU.operand2;
+			Buses_write_AddressBus_From_To(CPU, MMU);
+			MMU_readMemory();
+			registerAccumulator_CPU = registerIR_CPU.operand1 + registerMBR_CPU.operand1;
+			Processor_CheckOverflow(registerIR_CPU.operand1, registerMBR_CPU.operand1);
 			registerPC_CPU++;
 			break;
 			  
@@ -202,15 +204,14 @@ void Processor_DecodeAndExecuteInstruction() {
 			if (Processor_PSW_BitState(EXECUTION_MODE_BIT)) {
 				// Show final part of HARDWARE message with CPU registers
 				// Show message: " (PC: registerPC_CPU, Accumulator: registerAccumulator_CPU, PSW: registerPSW_CPU [Processor_ShowPSW()]\n
-				ComputerSystem_DebugMessage(3, HARDWARE,registerPC_CPU,registers[ACCUMULATOR],registerPSW_CPU,Processor_ShowPSW());
+				ComputerSystem_DebugMessage(130,HARDWARE,OperatingSystem_GetExecutingProcessID(),registerPC_CPU,registerAccumulator_CPU,registerPSW_CPU,Processor_ShowPSW());
 				// Not all operating system code is executed in simulated processor, but really must do it... 
-				Clock_Update();
 				OperatingSystem_InterruptLogic(registerIR_CPU.operand1);
 				registerPC_CPU++;
 				// Update PSW bits (ZERO_BIT, NEGATIVE_BIT, ...)
 				Processor_UpdatePSW();
 			} else
-				Processor_RaiseInterrupt(EXCEPTION_BIT);
+				Processor_RaiseException(INVALIDPROCESSORMODE);
 			return; // Note: message show before... for operating system messages after...
 
 		// Instruction IRET
@@ -219,11 +220,12 @@ void Processor_DecodeAndExecuteInstruction() {
 				registerPC_CPU=Processor_CopyFromSystemStack(MAINMEMORYSIZE-1);
 				registerPSW_CPU=Processor_CopyFromSystemStack(MAINMEMORYSIZE-2);
 			} else
-				Processor_RaiseInterrupt(EXCEPTION_BIT);
+				Processor_RaiseException(INVALIDPROCESSORMODE);
 			break;		
 
 		// Unknown instruction
 		default : 
+			Processor_RaiseException(INVALIDINSTRUCTION);
 			registerPC_CPU++;
 			break;
 	}
@@ -233,7 +235,7 @@ void Processor_DecodeAndExecuteInstruction() {
 	
 	// Show final part of HARDWARE message with	CPU registers
 	// Show message: " (PC: registerPC_CPU, Accumulator: registerAccumulator_CPU, PSW: registerPSW_CPU [Processor_ShowPSW()]\n
-	ComputerSystem_DebugMessage(3, HARDWARE,registerPC_CPU,registers[ACCUMULATOR],registerPSW_CPU,Processor_ShowPSW());
+	ComputerSystem_DebugMessage(130,HARDWARE,OperatingSystem_GetExecutingProcessID(),registerPC_CPU,registerAccumulator_CPU,registerPSW_CPU,Processor_ShowPSW());
 }
 	
 	
@@ -263,7 +265,7 @@ void Processor_ManageInterrupts() {
 // Update PSW state
 void Processor_UpdatePSW(){
 	// Update ZERO_BIT
-	if (registers[ACCUMULATOR]==0){
+	if (registerAccumulator_CPU==0){
 		if (!Processor_PSW_BitState(ZERO_BIT))
 			Processor_ActivatePSW_Bit(ZERO_BIT);
 	}
@@ -273,7 +275,7 @@ void Processor_UpdatePSW(){
 	}
 	
 	// Update NEGATIVE_BIT
-	if (registers[ACCUMULATOR]<0) {
+	if (registerAccumulator_CPU<0) {
 		if (!Processor_PSW_BitState(NEGATIVE_BIT))
 			Processor_ActivatePSW_Bit(NEGATIVE_BIT);
 	}
@@ -286,7 +288,6 @@ void Processor_UpdatePSW(){
 
 // Check overflow, receive operands for add (if sub, change operand2 sign)
 void Processor_CheckOverflow(int op1, int op2) {
-	int registerAccumulator_CPU = registers[ACCUMULATOR];
 			if ((op1>0 && op2>0 && registerAccumulator_CPU<0)
 				|| (op1<0 && op2<0 && registerAccumulator_CPU>0))
 				Processor_ActivatePSW_Bit(OVERFLOW_BIT);
@@ -389,8 +390,8 @@ int Processor_GetMBR_Value(){
 }
 
 // Setter for the Accumulator
- void Processor_SetRegister(int reg, int val){
-   registers[reg]=val;
+ void Processor_SetAccumulator(int acc){
+   registerAccumulator_CPU=acc;
  }
 
 // Setter for the PC
@@ -405,15 +406,19 @@ void Processor_SetPC(int pc){
 
 // Getter for the Accumulator
  int Processor_GetAccumulator() {
-   return registers[ACCUMULATOR];
+   return registerAccumulator_CPU;
  }
 
 // int Processor_GetPC() {
 //   return registerPC_CPU;
 // }
 
-int Processor_GetRegister(int reg) {
-  return registers[reg];
+int Processor_GetRegisterA() {
+  return registerA_CPU;
+}
+
+int Processor_GetRegisterB() {
+  return registerB_CPU;
 }
 
 // Setter for the PSW
@@ -450,3 +455,10 @@ char * Processor_ShowPSW(){
 void Processor_ShowTime(char section) {
 	ComputerSystem_DebugMessage(Processor_PSW_BitState(EXECUTION_MODE_BIT)?5:4,section,Clock_GetTime());
 }
+
+// Function to raise an exception. Exercise 1-c of V4
+void Processor_RaiseException(int typeOfException) {
+	Processor_RaiseInterrupt(EXCEPTION_BIT);
+	registerB_CPU=typeOfException;
+}
+

@@ -5,18 +5,16 @@
 
 #define INTERRUPTTYPES 10
 
-//Registers
-#define REGISTERS 10
-#define ACCUMULATOR 0
-#define REG_A 1
-
 // Enumerated type that connects bit positions in the PSW register with
 // processor events and status
 enum PSW_BITS {POWEROFF_BIT=0, ZERO_BIT=1, NEGATIVE_BIT=2, OVERFLOW_BIT=3, EXECUTION_MODE_BIT=7, INTERRUPT_MASKED_BIT=15};
 
 // Enumerated type that connects bit positions in the interruptLines with
 // interrupt types 
-enum INT_BITS {SYSCALL_BIT=2, EXCEPTION_BIT=6, CLOCK_BIT=9};
+enum INT_BITS {SYSCALL_BIT=2, EXCEPTION_BIT=6, IOEND_BIT = 8, CLOCK_BIT=9};
+
+// Exception types
+enum EXCEPTIONS {DIVISIONBYZERO, INVALIDPROCESSORMODE, INVALIDADDRESS, INVALIDINSTRUCTION};
 
 // Functions prototypes
 void Processor_InitializeInterruptVectorTable();
@@ -48,8 +46,8 @@ void Processor_SetPC(int);
 
 // The OS needs to access register A to when executing the system call management
 // routine, so it will be able to know the invoked system call identifier
-int Processor_GetRegister(int);
-void Processor_SetRegister(int,int);
+int Processor_GetRegisterA();
+int Processor_GetRegisterB();
 
 // The OS needs to access the PSW register to restore the context of
 // the process to which the processor is being assigned
@@ -60,5 +58,8 @@ unsigned int Processor_GetPSW();
 // The OS needs to set and get the value of  the accumulator
 
 int Processor_GetAccumulator();
+void Processor_SetAccumulator(int);
+
+void Processor_RaiseException(int);
 
 #endif

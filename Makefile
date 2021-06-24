@@ -45,7 +45,7 @@ MMU.o: MMU.c MMU.h
 OperatingSystem.o: OperatingSystem.c OperatingSystem.h
 	$(CC) $(STDCFLAGS) $(INCLUDES) OperatingSystem.c
 
-Processor.o: ProcessorV2.c ProcessorV2.h
+Processor.o: Processor.c Processor.h
 	$(CC) $(STDCFLAGS) $(INCLUDES) Processor.c
 
 QueueFIFO.o: QueueFIFO.c QueueFIFO.h

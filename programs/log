@@ -1,18 +1,18 @@
 20
 5
 //This program calculates the logarithm of base n (result stored in the accummulator)
-SET 2 32 //INPUT 2
-SET 4 2 //INPUT 2 (BASE)
+SET 2 32 // 
+SET 4 2 // BASE
 SET 3 0  //COUNTER
 SET 5 -1
 
 DIV 2 4
 MOV 0 2 
-INC 3 1
-ADD 2 5 // COUNTER - 1
+INC 3 1 // COUNTER++
+ADD 2 5 
 ZJUMP 2 
 JUMP -5
 
 MOV 3 0
-TRAP 6 //PRINT REGISTERS
+TRAP 1 //PRINT REGISTERS
 TRAP 3 //END

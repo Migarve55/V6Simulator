@@ -1,6 +1,4 @@
 #include "Clock.h"
-#include "Asserts.h"
-#include "OperatingSystemBase.h"
 #include "Device.h"
 
 before(): execution(void Processor_FetchInstruction()) {

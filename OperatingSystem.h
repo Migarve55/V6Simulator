@@ -44,7 +44,7 @@
 enum ProcessStates { NEW, READY, EXECUTING, BLOCKED, EXIT};
 
 // Enumerated type containing the list of system calls and their numeric identifiers
-enum SystemCallIdentifiers { SYSCALL_IO=1, SYSCALL_END=3, SYSCALL_YIELD=4, SYSCALL_PRINTEXECPID=5, SYSCALL_SLEEP=7};
+enum SystemCallIdentifiers { SYSCALL_IO=1, SYSCALL_END=3, SYSCALL_YIELD=4, SYSCALL_PRINTEXECPID=5, SYSCALL_PRINTCPUREG=6, SYSCALL_SLEEP=7};
 
 // A PCB contains all of the information about a process that is needed by the OS
 typedef struct {
@@ -54,7 +54,7 @@ typedef struct {
 	int state;
 	int priority;
 	int copyOfPCRegister;
-	int copyOfAccumulatorRegister;
+	int copyOfAccumulatorRegister; // Copy of all registers
 	unsigned int copyOfPSWRegister;
 	int programListIndex;
 	int queueID;

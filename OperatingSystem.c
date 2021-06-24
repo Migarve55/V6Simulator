@@ -533,6 +533,11 @@ void OperatingSystem_HandleSystemCall() {
 			OperatingSystem_TerminateProcess();
 			OperatingSystem_PrintStatus();
 			break;
+		case SYSCALL_PRINTCPUREG:
+			OperatingSystem_ShowTime(SYSPROC);
+			Processor_PrintRegisters();
+			OperatingSystem_PrintStatus();
+			break;
 		case SYSCALL_SLEEP:
 			OperatingSystem_UpdateWhenToWakeUp(executingProcessID);
 			OperatingSystem_MoveToTheBLOCKEDState(executingProcessID);
@@ -624,7 +629,7 @@ int OperatingSystem_CompareProcessPrivileges(int pid1, int pid2) {
 //	Implement interrupt logic calling appropriate interrupt handle
 void OperatingSystem_InterruptLogic(int entryPoint){
 	switch (entryPoint) {
-		case IOEND_BIT: // CLOCK_BIT=1
+		case IOEND_BIT: // IOEND_BIT=1
 			OperatingSystem_HandleIOEndInterrupt();
 			break;
 		case SYSCALL_BIT: // SYSCALL_BIT=2

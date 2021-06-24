@@ -47,11 +47,7 @@
 //  ComputerSystem messages
 99,@REND of the simulation@@\n
 
-// Students created messages
 // Format: numberOfMessage,textPrintfFormatedWithColourCodes
-//
-// numbers of messages greather than 100 for students
-//
 101,User program list:\n
 102,\tProgram [@B%s@@] with arrival time [@B%d@@]\n
 103,@RERROR: There are not free entries in the process table for the program [%s]@@\n
@@ -82,3 +78,5 @@
 143,Partition [@G%d@@: @G%d@@-> @G%d@@] has been assigned to process [@G%d@@]->[@G%s@@]\n
 144,@RERROR: a process could not be created from program[%s] because an appropriate partition is not available@@\n
 145,Partition [@G%d@@: @G%d@@-> @G%d@@] used by process [@G%d@@]->[@G%s@@] has been released\n
+146,CPU Registers state:\n
+147,[%d]: @R%d@@\n
