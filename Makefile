@@ -12,8 +12,8 @@ STDCFLAGS = -g -c -Wall -std=gnu90
 INCLUDES =
 LIBRERIAS =
 
-${PROGRAM}: Simulator.o Buses.o Clock.o ComputerSystem.o ComputerSystemBase.o Device.o Heap.o MainMemory.o Messages.o MMU.o OperatingSystem.o OperatingSystemBase.o Processor.o QueueFIFO.o
-	$(CC) -o ${PROGRAM} Simulator.o Buses.o Clock.o ComputerSystem.o ComputerSystemBase.o Device.o Heap.o MainMemory.o Messages.o MMU.o OperatingSystem.o OperatingSystemBase.o Processor.o QueueFIFO.o $(LIBRERIAS)
+${PROGRAM}: Simulator.o Buses.o Clock.o ComputerSystem.o  Device.o Heap.o MainMemory.o Messages.o MMU.o OperatingSystem.o  Processor.o QueueFIFO.o
+	$(CC) -o ${PROGRAM} Simulator.o Buses.o Clock.o ComputerSystem.o Device.o Heap.o MainMemory.o Messages.o MMU.o OperatingSystem.o Processor.o QueueFIFO.o $(LIBRERIAS)
 
 Simulator.o: Simulator.c Simulator.h
 	$(CC) $(STDCFLAGS) $(INCLUDES) Simulator.c
@@ -26,9 +26,6 @@ Clock.o: Clock.c Clock.h
 
 ComputerSystem.o: ComputerSystem.c ComputerSystem.h
 	$(CC) $(STDCFLAGS) $(INCLUDES) ComputerSystem.c
-
-ComputerSystemBase.o: ComputerSystemBase.c ComputerSystemBase.h ComputerSystem.h
-	$(CC) $(STDCFLAGS) $(INCLUDES) ComputerSystemBase.c
 
 Device.o: Device.c Device.h
 	$(CC) $(STDCFLAGS) $(INCLUDES) Device.c	
@@ -47,9 +44,6 @@ MMU.o: MMU.c MMU.h
 
 OperatingSystem.o: OperatingSystem.c OperatingSystem.h
 	$(CC) $(STDCFLAGS) $(INCLUDES) OperatingSystem.c
-
-OperatingSystemBase.o: OperatingSystemBase.c OperatingSystemBase.h OperatingSystem.h
-	$(CC) $(STDCFLAGS) $(INCLUDES) OperatingSystemBase.c
 
 Processor.o: ProcessorV2.c ProcessorV2.h
 	$(CC) $(STDCFLAGS) $(INCLUDES) Processor.c

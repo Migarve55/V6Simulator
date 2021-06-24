@@ -1,3 +1,84 @@
-5,test\n
-101,test\n
-102,test\n
+// Processor messages
+1,%c %d %d
+2,_ _ _
+3, (PC: @R%d@@, Accumulator: @R%d@@, PSW: @R%d@@ [@R%s@@])\n
+
+// Various sections messages
+4,[%d] 
+5,[@R%d@@] 
+
+// OperatingSystem messages
+21,@RERROR: Missing SIP program!@@\n
+22,@GProcess [%d] created from program [%s]@@\n
+23,@RProcess [%d] has generated an exception and is terminating@@\n
+24,@RProcess [%d] has the processor assigned@@\n
+25,@RProcess [%d] has requested to terminate@@\n
+26,SLEEPING Queue:\n\t\t
+27,[@G%d@@, %d, @R%d@@]
+28,Running Process Information:\n\t\t[PID: @G%d@@, Priority: %d, WakeUp: @R%d@@, Queue: %s]\n
+29,PID association with program's name:\n
+30,\t\tPID: @G%d@@ -> %s\n
+31,Arrival Time Queue:\n
+32,\t\t[@G%s@@, @R%d@@, @G%s@@]\n
+40,Main memory state (@G%s@@):\n
+41,\t\t[@G%d@@] [@G%d@@ -> @G%d@@]
+42,[@G%d@@]\n
+43,[@G%s@@]\n
+50,@M[@G%s@M] starting Input/Output operation. Output value [@G%d@M]@@\n
+51,Input/Output Queue:\n\t\t
+52,[@G%d@@]
+53,@M ****** Device [@G%s@M] END Process I/O with data [@G%d@M] ******@@\n
+54,@M ****** Device [@G%s@M] initialized with I/O time of [@G%d@M] tics ******@@\n
+
+// Assert system messages
+90,@RAssert failed. Time:@@ %d@R; Element:@@ %s;
+91,@R Expected:@@ %c@R; Real:@@ %c
+92,@R Expected:@@ %d@R; Real:@@ %d
+93,@R; Memory address:@@ %d
+94,@MWarning, @@%d@M unchecked asserts in Asserts queue !!!@@\n
+95,@MAssert warning. Unchecked assert @@(Time: %d, Element: %s)\n
+
+// Time
+97,New Tick (%d)\n
+
+// Formating and generic messages
+98,%s
+
+//  ComputerSystem messages
+99,@REND of the simulation@@\n
+
+// Students created messages
+// Format: numberOfMessage,textPrintfFormatedWithColourCodes
+//
+// numbers of messages greather than 100 for students
+//
+101,User program list:\n
+102,\tProgram [@B%s@@] with arrival time [@B%d@@]\n
+103,@RERROR: There are not free entries in the process table for the program [%s]@@\n
+104,@RERROR: Program [%s] is not valid [-- %s --]@@\n
+105,@RERROR: Program [%s] is too big@@\n
+106,Ready-to-run processes queue: 
+107,[@G%d@@,%d]
+//This are more general
+108,, 
+109,\n
+//For the states
+110,Process [@G%d@@] moving from the [@G%s@@] state to the [@G%s@@] state\n
+111,New process [@G%d@@] moving to the [@GNEW@@] state\n
+//More general for the queues
+112,\n\t\t%s: 
+//Syscall yield
+115,Process [@G%d@@] transfers control of the processor to process [@G%d@@]\n
+//Clock
+120,@CClock interrupt number [%d] has occurred@@\n
+121,Process [@G%d@@] is thrown out of the processor by process [@G%d@@]\n
+//New cpu message
+130, (PID: @G%d@@, PC: @R%d@@, Accumulator: @R%d@@, PSW: @R%d@@ [@R%s@@])\n
+//New exception messages
+140,Process [@R%d@@]->[@R%s@@] has caused an exception (@R%s@@) and is being terminated\n
+141,Process [@R%d@@]->[@R%s@@] has made an invalid system call (@R%d@@) and is being terminated\n
+//Memory messages
+142,Process [@G%d@@]->[@G%s@@] requests [@G%d@@] memory positions\n
+143,Partition [@G%d@@: @G%d@@-> @G%d@@] has been assigned to process [@G%d@@]->[@G%s@@]\n
+144,@RERROR: a process could not be created from program[%s] because an appropriate partition is not available@@\n
+145,Partition [@G%d@@: @G%d@@-> @G%d@@] used by process [@G%d@@]->[@G%s@@] has been released\n

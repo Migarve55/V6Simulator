@@ -9,6 +9,14 @@
 // Functions prototypes
 void ComputerSystem_PowerOn(int argc, char *argv[]);
 void ComputerSystem_PowerOff();
+int ComputerSystem_ObtainProgramList(int , char *[]);
+void ComputerSystem_DebugMessage(int, char , ...);
+void ComputerSystem_FillInArrivalTimeQueue();
+void ComputerSystem_PrintArrivalTimeQueue();
+
+// This "extern" declarations enables other source code files to gain access to the variables 
+extern int numberOfProgramsInArrivalTimeQueue;
+extern int arrivalTimeQueue[PROGRAMSMAXNUMBER];
 // void ComputerSystem_ObtainProgramList(int argc, char *argv[]);
 
 // Sections in which we divide our simulator in terms of
