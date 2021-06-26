@@ -127,7 +127,7 @@ void OperatingSystem_Initialize(int daemonsIndex) {
 	ComputerSystem_FillInArrivalTimeQueue();
 	OperatingSystem_PrintStatus();
 	//Initialization of I/O Devices
-	Device_Initialize ("OutputDevice-2018", 7);
+	Device_Initialize("Screen", 4);
 	// Create all user processes from the information given in the command line
 	OperatingSystem_LongTermScheduler(); 
 	//No user process where created 
@@ -167,10 +167,7 @@ void OperatingSystem_PrepareDaemons(int programListDaemonsBase) {
         // Prepare aditionals daemons here
         // index for aditionals daemons program in programList
         baseDaemonsInProgramList=programListDaemonsBase;
-
 }
-
-
 
 // The LTS is responsible of the admission of new processes in the system.
 // Initially, it creates a process from each program specified in the 
@@ -339,7 +336,7 @@ void OperatingSystem_PCBInitialization(int PID, int partitionId, int initialPhys
 	ComputerSystem_DebugMessage(111, SYSPROC, PID);
 	processTable[PID].priority = priority;
 	processTable[PID].programListIndex=processPLIndex;
-	processTable[PID].copyOfAccumulatorRegister = 0;
+	//processTable[PID].copyOfRegisters = int[REGISTERS];
 	processTable[PID].whenToWakeUp = 0;
 	processTable[PID].partitionId = partitionId;
 	// Daemons run in protected mode and MMU use real address
@@ -419,13 +416,14 @@ void OperatingSystem_RestoreContext(int PID) {
 	MMU_SetBase(processTable[PID].initialPhysicalAddress);
 	MMU_SetLimit(processTable[PID].processSize);
 	//Restore accumulator
-	Processor_SetAccumulator(processTable[PID].copyOfAccumulatorRegister);
+	Processor_SetAccumulator(processTable[PID].copyOfAccRegister);	
+	int i;
+	for (i=0;i<REGISTERS;i++)
+		Processor_SetRegister(i, processTable[PID].copyOfRegisters[i]);
 }
-
 
 // Function invoked when the executing process leaves the CPU 
 void OperatingSystem_PreemptRunningProcess() {
-
 	// Save in the process' PCB essential values stored in hardware registers and the system stack
 	OperatingSystem_SaveContext(executingProcessID);
 	// Change the process' state
@@ -433,7 +431,6 @@ void OperatingSystem_PreemptRunningProcess() {
 	// The processor is not assigned until the OS selects another process
 	executingProcessID=NOPROCESS;
 }
-
 
 // Save in the process' PCB essential values stored in hardware registers and the system stack
 void OperatingSystem_SaveContext(int PID) {
@@ -445,9 +442,11 @@ void OperatingSystem_SaveContext(int PID) {
 	processTable[PID].copyOfPSWRegister = Processor_CopyFromSystemStack(MAINMEMORYSIZE-2);
 	
 	// Load accumulator saved for interrupt manager
-	processTable[PID].copyOfAccumulatorRegister = Processor_GetAccumulator();
+	processTable[PID].copyOfAccRegister = Processor_GetAccumulator();
+	int i;
+	for (i=0;i<REGISTERS;i++)
+		processTable[PID].copyOfRegisters[i] = Processor_GetRegister(i);
 }
-
 
 // Exception management routine
 void OperatingSystem_HandleException() {
@@ -476,7 +475,6 @@ void OperatingSystem_HandleException() {
 
 // All tasks regarding the removal of the process
 void OperatingSystem_TerminateProcess() {
-  
 	int selectedProcess;
   	
 	int lastState = processTable[executingProcessID].state;
@@ -674,11 +672,10 @@ void OperatingSystem_IOScheduler(int pid)  {
 
 //Device dependent handler
 void OperatingSystem_DeviceControlerStartIOOperation()  {
-	int value;
 	if (Device_GetStatus() == BUSY)
 		return;
-	if ((value = OperatingSystem_GetFirstFromIOWaiting()) >= 0)
-		Device_StartIO(value);
+	if (OperatingSystem_GetFirstFromIOWaiting() >= 0)
+		Device_StartIO();
 }
 
 int OperatingSystem_DeviceControlerEndIOOperation()  {
@@ -996,41 +993,6 @@ void OperatingSystem_PrintProcessTableAssociation() {
   		ComputerSystem_DebugMessage(30,SHORTTERMSCHEDULE,i,programList[processTable[i].programListIndex]->executableName);
   	}
   }
-}
-
-void OperatingSystem_PrepareTeachersDaemons(){
-	FILE *daemonsFile;
-	char lineRead[MAXLINELENGTH];
-	PROGRAMS_DATA *progData;
-	char *name, *arrivalTime;
-	int time;
-
-
-	daemonsFile= fopen("teachersDaemons", "r");
-
-	// Check if programFile exists
-	if (daemonsFile==NULL)
-		return;
-
-	while (fgets(lineRead, MAXLINELENGTH, daemonsFile) != NULL
-					 && baseDaemonsInProgramList<PROGRAMSMAXNUMBER) {
-		name=strtok(lineRead,",");
-	    if (name==NULL){
-			continue;
-		}
-
-		arrivalTime=strtok(NULL,",");
-    	if (arrivalTime==NULL
-    		|| sscanf(arrivalTime,"%d",&time)==0)
-    		time=0;
-    	
-    	progData=(PROGRAMS_DATA *) malloc(sizeof(PROGRAMS_DATA));
-    	progData->executableName = (char *) malloc((strlen(name)+1)*sizeof(char));
-    	strcpy(progData->executableName,name);
-    	progData->arrivalTime=time;
-    	progData->type=DAEMONPROGRAM;
-    	programList[baseDaemonsInProgramList++]=progData;
-	}
 }
 
 // This function returns:

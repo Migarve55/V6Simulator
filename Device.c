@@ -30,7 +30,7 @@ void Device_Initialize(char * name, int delay) {
 		ioLapTime=delay;
 	
 	ComputerSystem_DebugMessage(4, DEVICE, now);
-	ComputerSystem_DebugMessage(54,DEVICE,deviceName,ioLapTime);
+	ComputerSystem_DebugMessage(54, DEVICE, deviceName, ioLapTime);
 #endif
 }
 
@@ -49,16 +49,19 @@ void Device_UpdateStatus() {
 void Device_PrintIOResult() {
 #ifdef DEVICE
 	int now=Clock_GetTime();
+	printf(">> %d\n", registerIOData.info);
 	ComputerSystem_DebugMessage(4, DEVICE, now);
 	// Show message ******** Device [deviceName] END Process I/O with data [info] ********
 	ComputerSystem_DebugMessage(53, DEVICE, deviceName, registerIOData.info);
 #endif
 }
 
-void Device_StartIO(int value) {
+void Device_StartIO() {
 #ifdef DEVICE
 	int now=Clock_GetTime();
 	ComputerSystem_DebugMessage(Processor_PSW_BitState(EXECUTION_MODE_BIT)?5:4,DEVICE,now);
+	// Read memory
+	int value = 0;
   	// Show message [Device] starting Input/Output operation. Output value [value]
   	ComputerSystem_DebugMessage(50, DEVICE, deviceName, value);
 

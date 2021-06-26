@@ -8,14 +8,14 @@
             "name": "gcc - Compilar y depurar el archivo activo",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${fileDirname}/sim",
+            "program": "${workspaceRoot}/sim",
             "args": [
                 "A",
                 "programs/log",
-                "1"
+                "10"
             ],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceRoot}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -26,7 +26,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "C/C++: gcc compilar archivo activo",
+            "preLaunchTask": "make",
             "miDebuggerPath": "/usr/bin/gdb"
         }
     ]

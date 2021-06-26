@@ -3,7 +3,7 @@
 4  // Program size in memory cells
 100 // Priority of process (very low priority)
 
-ADD 1301 417
+ADD 1 1
 NOP
 JUMP -1  // Jump to NOP
 HALT

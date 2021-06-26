@@ -2,6 +2,7 @@
 #define OPERATINGSYSTEM_H
 
 #include "ComputerSystem.h"
+#include "Processor.h"
 #include <stdio.h>
 
 #define NUMBEROFQUEUES 2 
@@ -54,7 +55,8 @@ typedef struct {
 	int state;
 	int priority;
 	int copyOfPCRegister;
-	int copyOfAccumulatorRegister; // Copy of all registers
+	int copyOfAccRegister;
+	int copyOfRegisters[REGISTERS]; // Copy of all registers
 	unsigned int copyOfPSWRegister;
 	int programListIndex;
 	int queueID;

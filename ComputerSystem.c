@@ -39,7 +39,7 @@ void ComputerSystem_PowerOn(int argc, char *argv[]) {
 	// Load debug messages
 	int nm=0;
 	nm=Messages_Load_Messages(nm, MESSAGES_FILE);
-	printf("%d Messages Loaded\n",nm);
+	//printf("%d Messages Loaded\n",nm);
 
 	// Obtain a list of programs in the command line
 	int daemonsBaseIndex = ComputerSystem_ObtainProgramList(argc, argv);

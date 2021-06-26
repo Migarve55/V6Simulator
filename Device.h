@@ -11,7 +11,7 @@ typedef struct {
 // Prototipos de las funciones
 void Device_UpdateStatus();
 void Device_PrintIOResult();
-void Device_StartIO(int);
+void Device_StartIO();
 int Device_GetStatus();
 void Device_Initialize(char *, int);
 
